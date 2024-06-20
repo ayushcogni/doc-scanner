@@ -50,7 +50,9 @@ def monitor_and_process_files():
         db.session.commit()
 
     # Retrieve all file metadata from the database
-    files_metadata = FileMetadata.query.all()
+    files_metadata = FileMetadata.query.order_by(FileMetadata.upload_time).all()
+
+    #files_metadata = FileMetadata.query.all()
     file_list = [{'file_path': f.file_path, 'file_name': f.file_name, 'checksum': f.checksum,
                   'upload_time': f.upload_time, 'validation_status': f.validation_status,
                   'process_status': f.process_status} for f in files_metadata]

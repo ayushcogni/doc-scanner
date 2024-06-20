@@ -28,6 +28,7 @@ def upload_file():
     file_path = os.path.join(destination_folder, file.filename)
     file.save(file_path)
     checksum = calculate_checksum(file_path)
+    files_metadata = FileMetadata.query.order_by(FileMetadata.upload_time).all()
 
     new_file = FileMetadata(file_path=file_path, checksum=checksum,
                             validation_status='pending', file_name=file.filename)
