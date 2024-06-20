@@ -16,8 +16,9 @@ def monitor_and_process_files():
     input_folder = app.config['INPUT_FOLDER']
     errors_folder = app.config['ERRORS_FOLDER']
     processed_folder = app.config['PROCESSED_FOLDER']
-    
+    print("inside monitor function")
     for subdir, dirs, files in os.walk(input_folder):
+        print("value of files ==", subdir, dirs, files)
         if subdir == input_folder:  # Skip the root input folder
             continue
 
@@ -48,7 +49,7 @@ def monitor_and_process_files():
             )
             db.session.add(file_metadata)
         db.session.commit()
-
+        
     # Retrieve all file metadata from the database
     files_metadata = FileMetadata.query.order_by(FileMetadata.upload_time).all()
 

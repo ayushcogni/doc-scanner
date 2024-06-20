@@ -28,8 +28,7 @@ def upload_file():
     file_path = os.path.join(destination_folder, file.filename)
     file.save(file_path)
     checksum = calculate_checksum(file_path)
-    files_metadata = FileMetadata.query.order_by(FileMetadata.upload_time).all()
-
+    
     new_file = FileMetadata(file_path=file_path, checksum=checksum,
                             validation_status='pending', file_name=file.filename)
     db.session.add(new_file)
@@ -39,5 +38,6 @@ def upload_file():
 
 @app.route('/process-files', methods=['POST'])
 def process_files():
+    print("api hit ==")
     files_metadata = monitor_and_process_files()
     return jsonify(files_metadata), 200

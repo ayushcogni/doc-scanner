@@ -5,12 +5,12 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('app.config.Config')
+    app.config.from_pyfile('config.py')
 
     db.init_app(app)
 
+    from .models import FileMetadata
     with app.app_context():
-        from . import views
         db.create_all()
 
     return app
