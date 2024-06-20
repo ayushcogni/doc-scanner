@@ -1,5 +1,4 @@
 from flask import Flask
-from .models import db, FileMetadata
 from .config import Config
 from flask_sqlalchemy import SQLAlchemy
 
@@ -11,6 +10,9 @@ def create_app():
 
     db.init_app(app)
 
-    from app import models
+    # Register blueprints or other setup code here
 
     return app
+
+# Avoid circular import by importing models after initializing db
+from . import models
