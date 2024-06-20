@@ -13,12 +13,16 @@ def calculate_checksum(file_path):
     return file_hash.hexdigest()
 
 def monitor_and_process_files():
-    for subdir, dirs, files in os.walk(app.config['INPUT_FOLDER']):
-        if subdir == app.config['INPUT_FOLDER']:  # Skip the root input folder
+    input_folder = app.config['INPUT_FOLDER']
+    errors_folder = app.config['ERRORS_FOLDER']
+    processed_folder = app.config['PROCESSED_FOLDER']
+    
+    for subdir, dirs, files in os.walk(input_folder):
+        if subdir == input_folder:  # Skip the root input folder
             continue
 
         if len(files) != 6:
-            move_folder(subdir, app.config['ERRORS_FOLDER'])
+            move_folder(subdir, errors_folder)
             continue
 
         # Validate files
@@ -26,9 +30,32 @@ def monitor_and_process_files():
         
         # Move folder based on validation status
         if validation_status == 'processed':
-            move_folder(subdir, app.config['PROCESSED_FOLDER'])
+            move_folder(subdir, processed_folder)
         else:
-            move_folder(subdir, app.config['ERRORS_FOLDER'])
+            move_folder(subdir, errors_folder)
+
+        # Save file metadata to the database
+        for file in files:
+            file_path = os.path.join(subdir, file)
+            checksum = calculate_checksum(file_path)
+            file_metadata = FileMetadata(
+                file_path=file_path,
+                file_name=file,
+                checksum=checksum,
+                upload_time=db.func.now(),
+                validation_status=validation_status,
+                process_status='processed' if validation_status == 'processed' else 'error'
+            )
+            db.session.add(file_metadata)
+        db.session.commit()
+
+    # Retrieve all file metadata from the database
+    files_metadata = FileMetadata.query.all()
+    file_list = [{'file_path': f.file_path, 'file_name': f.file_name, 'checksum': f.checksum,
+                  'upload_time': f.upload_time, 'validation_status': f.validation_status,
+                  'process_status': f.process_status} for f in files_metadata]
+
+    return file_list
 
 def move_folder(folder_path, destination_folder):
     folder_name = os.path.basename(folder_path)

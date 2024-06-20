@@ -35,3 +35,8 @@ def upload_file():
     db.session.commit()
 
     return jsonify({'message': 'File uploaded successfully'}), 201
+
+@app.route('/process-files', methods=['POST'])
+def process_files():
+    files_metadata = monitor_and_process_files()
+    return jsonify(files_metadata), 200
